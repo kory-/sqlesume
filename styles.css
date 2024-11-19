@@ -1,0 +1,185 @@
+body {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    padding: 0;
+    user-select: text;
+    min-height: 100vh;
+    position: relative;
+    overflow-y: auto;
+}
+
+#console {
+    width: calc(100% - 140px);
+    min-height: calc(100vh - 100px);
+    position: absolute;
+    left: 70px;
+    top: 70px;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+}
+
+#output {
+    white-space: pre;
+    padding: 0;
+    margin: 0;
+    min-height: 0;
+    line-height: 1.2;
+}
+
+#output div {
+    margin: 0;
+    padding: 0;
+}
+
+#input-line {
+    display: flex;
+    align-items: center;
+    height: 1.2em;
+    position: relative;
+    background-color: #1e1e1e;
+    padding: 0;
+    margin: 0;
+}
+
+.prompt {
+    color: #00ff00;
+    white-space: pre;
+}
+
+#current-input {
+    color: #ffffff;
+    white-space: pre;
+    position: relative;
+    display: inline-block;
+}
+
+#sql-input {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.2em;
+    background-color: #00ff00;
+    opacity: 0.7;
+    vertical-align: middle;
+}
+
+.cursor.overlap {
+    color: #000;
+    background-color: #00ff00;
+    margin: 0;
+}
+
+#current-input span {
+    position: relative;
+    white-space: pre;
+}
+
+.composition {
+    background-color: #333;
+    border-bottom: 1px solid #00ff00;
+    padding: 0 2px;
+}
+
+.terminal {
+    width: calc(100% - 140px);
+    min-height: calc(100vh - 100px);
+    position: absolute;
+    left: 70px;
+    top: 70px;
+    padding: 0;
+    margin: 0;
+    font-family: 'Courier New', monospace;
+}
+
+#terminal-output {
+    padding: 0;
+    margin: 0;
+    min-height: 0;
+    line-height: 1.2;
+}
+
+#terminal-output div {
+    margin: 0;
+    line-height: 1.2;
+    min-height: 0;
+}
+
+#terminal-input-line {
+    display: flex;
+    align-items: center;
+    height: 1.2em;
+    position: relative;
+    background-color: #1e1e1e;
+    padding: 0;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.prompt-terminal {
+    color: #00ff00;
+    white-space: pre;
+}
+
+#terminal-current-input {
+    color: #ffffff;
+    white-space: pre;
+    padding: 0;
+    margin: 0;
+}
+
+#terminal-input {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.directory {
+    color: #4488ff;
+    margin-right: 10px;
+    font-weight: normal;
+    white-space: pre;
+}
+
+.file {
+    color: #ffffff;
+    margin-right: 10px;
+    font-weight: normal;
+    white-space: pre;
+}
+
+.terminal-image {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #2a2a2a;
+    display: inline-block;
+    border-radius: 4px;
+}
+
+.terminal-image img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* img2sixel用のスタイル */
+.terminal-sixel img {
+    image-rendering: pixelated; /* ピクセル化効果 */
+    filter: brightness(0.9) contrast(1.1); /* よりターミナルらしい見た目に */
+}
+
+/* imgcat用のスタイル */
+.terminal-imgcat img {
+    filter: brightness(1.1); /* より鮮やかな表示 */
+} 
