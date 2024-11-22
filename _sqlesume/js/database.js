@@ -334,72 +334,6 @@ class Database {
         const columns = query.columns[0] === '*' ? table.columns : query.columns;
         const columnIndexes = columns.map(col => table.columns.indexOf(col));
 
-        // WHERE句の処理
-        if (query.where) {
-            data = data.filter(row => {
-                const colIndex = table.columns.indexOf(query.where.column);
-                const value = String(row[colIndex]);
-                const compareValue = String(query.where.value);
-
-                switch (query.where.operator) {
-                    case '=': return value === compareValue;
-                    case '!=': return value !== compareValue;
-                    case '>': return value > compareValue;
-                    case '<': return value < compareValue;
-                    case '>=': return value >= compareValue;
-                    case '<=': return value <= compareValue;
-                    case 'LIKE':
-                        const pattern = compareValue
-                            .replace(/%/g, '.*')
-                            .replace(/_/g, '.');
-                        return new RegExp(`^${pattern}$`, 'i').test(value);
-                    default: return false;
-                }
-            });
-        }
-
-        // GROUP BY の処理
-        if (query.groupBy.length > 0) {
-            const groups = new Map();
-            const groupIndexes = query.groupBy.map(col => table.columns.indexOf(col));
-
-            data.forEach(row => {
-                const groupKey = groupIndexes.map(i => row[i]).join('|');
-                if (!groups.has(groupKey)) {
-                    groups.set(groupKey, []);
-                }
-                groups.get(groupKey).push(row);
-            });
-
-            data = Array.from(groups.values()).map(group => {
-                const result = [...group[0]];
-                // 集計関数の処理をここに追加できます
-                return result;
-            });
-        }
-
-        // ORDER BY の処理
-        if (query.orderBy.length > 0) {
-            data.sort((a, b) => {
-                for (const order of query.orderBy) {
-                    const colIndex = table.columns.indexOf(order.column);
-                    const aVal = a[colIndex];
-                    const bVal = b[colIndex];
-                    
-                    if (aVal === bVal) continue;
-                    
-                    const comparison = aVal > bVal ? 1 : -1;
-                    return order.direction === 'DESC' ? -comparison : comparison;
-                }
-                return 0;
-            });
-        }
-
-        // LIMIT の処理
-        if (query.limit !== null) {
-            data = data.slice(0, query.limit);
-        }
-
         // 表示用の整形
         const getDisplayLength = (str) => {
             return [...String(str)].reduce((acc, char) => {
@@ -422,19 +356,19 @@ class Database {
             return Math.max(headerLength, maxDataLength);
         });
 
-        let result = columns.map((col, i) => 
+        let result = '+-' + columnWidths.map(width => '-'.repeat(width)).join('-+-') + '-+\n';
+        result += '| ' + columns.map((col, i) => 
             padEndDisplay(col, columnWidths[i])
-        ).join(' | ');
-
-        result += '\n' + columnWidths.map(width => 
-            '-'.repeat(width)
-        ).join('-+-') + '\n';
+        ).join(' | ') + ' |\n';
+        result += '+-' + columnWidths.map(width => '-'.repeat(width)).join('-+-') + '-+\n';
 
         data.forEach(row => {
-            result += columnIndexes.map((colIndex, i) => 
+            result += '| ' + columnIndexes.map((colIndex, i) => 
                 padEndDisplay(String(row[colIndex]), columnWidths[i])
-            ).join(' | ') + '\n';
+            ).join(' | ') + ' |\n';
         });
+
+        result += '+-' + columnWidths.map(width => '-'.repeat(width)).join('-+-') + '-+\n';
 
         return result;
     }

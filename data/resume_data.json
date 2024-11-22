@@ -1,0 +1,122 @@
+{
+    "databases": {
+        "resume_db": {
+            "tables": {
+                "personal_info": {
+                    "columns": ["name", "birth_date", "gender", "email"],
+                    "data": [
+                        [
+                            "下野圭太",
+                            "1987-09-07",
+                            "男性",
+                            "k.shimono@omot.co.jp"
+                        ]
+                    ]
+                },
+                "education": {
+                    "columns": ["start_year", "end_year", "institution", "degree"],
+                    "data": [
+                        [
+                            2001,
+                            2005,
+                            "兵庫県立姫路工業高等学校 電子機械科",
+                            "卒業"
+                        ],
+                        [
+                            2005,
+                            2009,
+                            "近畿大学 工学部 情報システム工学科",
+                            "卒業"
+                        ]
+                    ]
+                },
+                "work_experience": {
+                    "columns": [
+                        "start_year",
+                        "end_year",
+                        "company_id",
+                        "role",
+                        "reason_for_leaving",
+                        "responsibilities"
+                    ],
+                    "data": [
+                        [
+                            2009,
+                            2012,
+                            1,
+                            "システムエンジニア",
+                            "退社",
+                            "オープン系技術職、担当クライアントとの折衝や設計"
+                        ],
+                        [
+                            2012,
+                            2019,
+                            2,
+                            "取締役",
+                            "退社",
+                            "受託開発"
+                        ],
+                        [
+                            2019,
+                            2023,
+                            3,
+                            "開発部 部長",
+                            "転籍",
+                            ""
+                        ],
+                        [
+                            2023,
+                            "現在",
+                            4,
+                            "CTO/取締役",
+                            "在職中",
+                            ""
+                        ]
+                    ]
+                },
+                "qualifications": {
+                    "columns": ["qualification_name", "issue_year"],
+                    "data": [
+                        [
+                            "普通自動車免許",
+                            2005
+                        ]
+                    ]
+                },
+                "skills": {
+                    "columns": ["id", "skill_name", "level", "years_used"],
+                    "data": [
+                        [1, "Python", "上級", 5],
+                        [2, "JavaScript", "上級", 10],
+                        [3, "Ruby", "初級", 1],
+                        [4, "PHP", "上級", 15],
+                        [5, "Go", "中級", 2],
+                        [6, "AWS", "上級", 12]
+                    ]
+                },
+                "companies": {
+                    "columns": ["id", "company_name", "industry", "size", "description"],
+                    "data": [
+                        [1, "インタークエスト株式会社", "受託開発", "50名", "オープン系技術を用いたシステム開発"],
+                        [2, "ソーシャルグリッド株式会社", "受託開発", "5名", "オープン系技術を用いたシステム開発"],
+                        [3, "FISM株式会社", "オンラインマーケティング", "x名", "インフルエンサーマーケティング"],
+                        [4, "株式会社OMOT", "オンラインマーケティング", "x名", "インフルエンサーマーケティング"]
+                    ]
+                }
+            }
+        },
+        "private_db": {
+            "tables": {
+                "hobbies": {
+                    "columns": ["id", "hobby"],
+                    "data": [
+                        [1, "ゲーム"],
+                        [2, "漫画"],
+                        [3, "アニメ"],
+                        [4, "アルゴトレード"]
+                    ]
+                }
+            }
+        }
+    }
+}
