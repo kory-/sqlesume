@@ -191,6 +191,7 @@ export class Database {
         
         return `Database changed to ${dbName}`;
       } catch (error) {
+        console.error('Error switching database:', error);
         return `Error: Could not switch to database "${dbName}"`;
       }
     }
@@ -199,18 +200,6 @@ export class Database {
 
   executeQuery(parsedQuery: ParsedQuery): string {
     this.lastCommand = parsedQuery.originalCommand;
-
-    if (parsedQuery.type === 'CANCEL') {
-      return '^C';
-    }
-
-    if (parsedQuery.type === 'ERROR') {
-      return this.formatError(
-        parsedQuery.message || 'Unknown error',
-        1,
-        parsedQuery.errorToken || ''
-      );
-    }
 
     try {
       switch (parsedQuery.type) {
@@ -222,7 +211,6 @@ export class Database {
             return 'Error: No database selected';
           }
           try {
-            // 現在のデータベースを使用するように設定
             alasql(`USE ${this.currentDB}`);
             const result = alasql(parsedQuery.originalCommand);
             return this.formatSelectResult(result);
@@ -230,12 +218,18 @@ export class Database {
             return `Error: ${error.message}`;
           }
         case 'USE_DATABASE':
-          return this.useDatabase(parsedQuery.database || '');
+          if ('database' in parsedQuery) {
+            return this.useDatabase(parsedQuery.database);
+          }
+          return 'Error: Invalid USE DATABASE command';
         case 'SHOW_DATABASES':
         case 'LIST_DATABASES':
           return this.showDatabases();
         case 'DESCRIBE_TABLE':
-          return this.describeTable(parsedQuery.table || '');
+          if ('table' in parsedQuery) {
+            return this.describeTable(parsedQuery.table || '');
+          }
+          return 'Error: Invalid DESCRIBE command';
         case 'EXIT':
           if (this.onExit) {
             this.onExit();
@@ -244,11 +238,20 @@ export class Database {
         case 'INSERT':
         case 'UPDATE':
         case 'DELETE':
-        case 'CREATE_TABLE':
         case 'DROP_TABLE':
+        case 'CREATE_TABLE':
           return `Error: ${parsedQuery.type} operation is not allowed in read-only mode`;
-        default:
-          return `Error: Unknown query type: ${parsedQuery.type}`;
+        case 'CANCEL':
+          return '^C';
+        case 'ERROR':
+          if ('message' in parsedQuery) { // 型ガードでチェック
+            return parsedQuery.message || 'Unknown error';
+          }
+          return 'Unknown error';
+        default: {
+          const exhaustiveCheck: never = parsedQuery; // 型の網羅性を保証
+          return `Error: Unknown query type: ${(parsedQuery as any).type}`;
+        }
       }
     } catch (error: any) {
       return `Error: ${error.message}`;
@@ -321,4 +324,25 @@ export class Database {
   }
 
   // ... その他のメソッドは変更なし
+
+  getCurrentDatabase(): string | null {
+    return this.currentDB;
+  }
+
+  getDatabases(): string[] {
+    return Object.keys(this.data.databases);
+  }
+
+  getTables(dbName?: string): string[] {
+    const db = dbName || this.currentDB;
+    if (!db || !this.data.databases[db]) return [];
+    return Object.keys(this.data.databases[db].tables);
+  }
+
+  getColumns(tableName: string, dbName?: string): string[] {
+    const db = dbName || this.currentDB;
+    if (!db || !this.data.databases[db]) return [];
+    const table = this.data.databases[db].tables[tableName];
+    return table ? table.columns : [];
+  }
 } 

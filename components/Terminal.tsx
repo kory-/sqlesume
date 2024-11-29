@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { Database } from '../lib/database';
-import { SQLParser } from '../lib/sqlParser';
-import resumeData from '../data/resume_data.json';
+import { Database } from 'lib/database';
+import { SQLParser } from 'lib/sqlParser';
+import { DatabaseStructure, SimpleQuery } from 'lib/types';
+import resumeData from 'data/resume_data.json';
 import { useRouter } from 'next/router';
 
 interface TerminalProps {
   className?: string;
+  initialData: DatabaseStructure;
 }
 
 const isFullWidth = (char: string): boolean => {
@@ -17,7 +19,7 @@ const isFullWidth = (char: string): boolean => {
   );
 };
 
-export const Terminal: React.FC<TerminalProps> = ({ className }) => {
+export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) => {
   const [input, setInput] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
@@ -32,7 +34,7 @@ export const Terminal: React.FC<TerminalProps> = ({ className }) => {
   const [sqlHistory, setSqlHistory] = useState<string[]>([]);
   const [terminalHistory, setTerminalHistory] = useState<string[]>(['imgcat profile.png']);
 
-  const db = useRef(new Database(resumeData as DatabaseStructure, () => {
+  const db = useRef(new Database(initialData, () => {
     setOutput(prev => [...prev, 'Bye']);
     setTimeout(() => {
       setIsTerminalMode(false);
@@ -113,7 +115,10 @@ export const Terminal: React.FC<TerminalProps> = ({ className }) => {
     // Ctrl+C の処理を追加
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
       e.preventDefault();
-      const parsedQuery = { type: 'CANCEL', originalCommand: '' };
+      const parsedQuery: SimpleQuery = {  // BaseQueryからSimpleQueryに変更
+        type: 'CANCEL',
+        originalCommand: ''
+      };
       appendOutput(`${getPrompt()}${input}`);
       const result = db.current.executeQuery(parsedQuery);
       if (result) {
