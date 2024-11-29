@@ -1,5 +1,0 @@
-name = "sqlresume"
-compatibility_date = "2024-11-29"
-compatibility_flags = ["nodejs_compat"]
-
-pages_build_output_dir = ".next"

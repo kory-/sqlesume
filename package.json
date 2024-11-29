@@ -9,11 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "build:worker": "cloudflare",
-    "dev:worker": "wrangler dev --port 8771",
-    "preview:worker": "npm run build:worker && npm run dev:worker",
-    "deploy:worker": "npm run build:worker && wrangler deploy"
+    "lint": "next lint"
   },
   "dependencies": {
     "alasql": "4.5.2",
@@ -22,7 +18,6 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "1.13.6",
     "@types/node": "20.10.4",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.0",
