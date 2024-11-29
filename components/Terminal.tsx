@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { Database } from 'lib/database';
 import { SQLParser } from 'lib/sqlParser';
 import { DatabaseStructure, SimpleQuery } from 'lib/types';
-import resumeData from 'data/resume_data.json';
+import personalData from 'data/personal_data.json';
 import { useRouter } from 'next/router';
 
 interface TerminalProps {

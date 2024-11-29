@@ -1,6 +1,6 @@
 {
     "databases": {
-        "resume_db": {
+        "career_db": {
             "tables": {
                 "personal_info": {
                     "columns": ["name", "birth_date", "gender", "email"],

@@ -2,19 +2,19 @@
 
 import { GetServerSideProps } from 'next';
 import { Terminal } from 'components/Terminal';
-import resumeData from 'data/resume_data.json';
+import personalData from 'data/personal_data.json';
 
 // SSRでデータを取得
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
-      initialData: resumeData
+      initialData: personalData
     }
   };
 };
 
 interface HomeProps {
-  initialData: typeof resumeData;
+  initialData: typeof personalData;
 }
 
 export default function Home({ initialData }: HomeProps) {
