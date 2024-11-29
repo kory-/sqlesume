@@ -1,9 +1,0 @@
-career-sql-console/
-├── index.html
-├── styles.css
-├── js/
-│   ├── main.js
-│   ├── sqlParser.js
-│   └── database.js
-└── data/
-    └── career_data.js 
