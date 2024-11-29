@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { Database } from '../lib/database';
-import { SQLParser } from '../lib/sqlParser';
-import { DatabaseStructure } from '../lib/types';
-import resumeData from '../data/resume_data.json';
+import { Database } from 'lib/database';
+import { SQLParser } from 'lib/sqlParser';
+import { DatabaseStructure, SimpleQuery } from 'lib/types';
+import resumeData from 'data/resume_data.json';
 import { useRouter } from 'next/router';
 
 interface TerminalProps {
@@ -115,7 +115,10 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
     // Ctrl+C の処理を追加
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
       e.preventDefault();
-      const parsedQuery = { type: 'CANCEL', originalCommand: '' };
+      const parsedQuery: SimpleQuery = {  // BaseQueryからSimpleQueryに変更
+        type: 'CANCEL',
+        originalCommand: ''
+      };
       appendOutput(`${getPrompt()}${input}`);
       const result = db.current.executeQuery(parsedQuery);
       if (result) {

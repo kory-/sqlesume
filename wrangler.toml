@@ -5,9 +5,6 @@ node_compat = true
 [build]
 command = "npm run build"
 
-[env]
-NODE_VERSION = "18.18.0"
-
 pages_build_output_dir = ".vercel/output/static"
 
 [[build.upload]]
