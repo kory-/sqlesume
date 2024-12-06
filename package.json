@@ -12,6 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.4.1",
     "alasql": "4.5.2",
     "next": "^15.0.3",
     "react": "^18.3.1",
