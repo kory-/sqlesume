@@ -18,7 +18,7 @@ export class SQLParser {
     const queryContext = query.toLowerCase().trim();
     
     // データベース名の補完
-    if (queryContext.startsWith('use ')) {
+    if (queryContext.startsWith('use ') || queryContext.startsWith('\\c ')) {
       return Object.keys(db.data.databases)
         .filter(dbName => dbName.toLowerCase().startsWith(lastWord));
     }
@@ -144,14 +144,22 @@ export class SQLParser {
           return { type: 'LIST_TABLES', originalCommand: query };
         case 'd':
           if (parts.length > 1) {
-            return { type: 'DESCRIBE_TABLE', originalCommand: query, table: parts[1] };
+            return { 
+              type: 'DESCRIBE_TABLE', 
+              originalCommand: query, 
+              table: parts[1] 
+            } as DescribeTableQuery;
           }
           return { type: 'LIST_TABLES', originalCommand: query };
         case 'c':
           if (parts.length > 1) {
-            return { type: 'USE_DATABASE', originalCommand: query, database: parts[1] };
+            return { 
+              type: 'USE_DATABASE', 
+              originalCommand: query, 
+              database: parts[1].replace(/;$/, '') 
+            } as UseDatabaseQuery;
           }
-          return null;
+          return errorQuery;
         case 'q':
           return { type: 'EXIT', originalCommand: query };
         default:
@@ -176,8 +184,11 @@ export class SQLParser {
           type: 'USE_DATABASE', 
           originalCommand: query,
           database: dbName 
-        };
+        } as UseDatabaseQuery;
       }
+    }
+    if (lowerQuery === 'exit' || lowerQuery === 'exit;') {
+      return { type: 'EXIT', originalCommand: query };
     }
     return errorQuery;
   }

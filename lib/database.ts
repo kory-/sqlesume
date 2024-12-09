@@ -2,7 +2,7 @@ import alasql from 'alasql';
 import { DatabaseStructure, ParsedQuery } from './types';
 
 export class Database {
-  data: DatabaseStructure;
+  data: DatabaseStructure['data'];
   currentDB: string | null;
   files: string[];
   imagePaths: { [key: string]: string };
@@ -10,7 +10,7 @@ export class Database {
   onExit?: () => void;
 
   constructor(data: DatabaseStructure, onExit?: () => void) {
-    this.data = data;
+    this.data = data.data;
     this.currentDB = null;
     this.files = ['secret.png', 'profile.png'];
     this.imagePaths = {
@@ -24,54 +24,45 @@ export class Database {
     this.initializeDatabase();
   }
 
-  private initializeDatabase() {
+  private async initializeDatabase() {
     try {
       // 既存のデータベースをクリア
       try {
-        // 既存のデータベースを一旦全て削除
         const databases = alasql('SHOW DATABASES');
-        databases.forEach((db: { databaseid: string }) => {
-          if (db.databaseid !== 'alasql') { // alasqlシステムDBは削除しない
-            alasql(`DROP DATABASE IF EXISTS ${db.databaseid}`);
+        for (const db of databases) {
+          if (db.databaseid !== 'alasql') {
+            try {
+              alasql(`DROP DATABASE IF EXISTS ${db.databaseid}`);
+            } catch (e) {
+              console.warn(`Failed to drop database ${db.databaseid}:`, e);
+            }
           }
-        });
+        }
       } catch (e) {
         console.warn('Error clearing existing databases:', e);
       }
 
       // データベースごとの初期化
-      Object.entries(this.data.databases).forEach(([dbName, db]) => {
+      for (const [dbName, db] of Object.entries(this.data.databases)) {
         try {
-          alasql(`CREATE DATABASE ${dbName}`);
+          // データベースの作成
+          alasql(`CREATE DATABASE IF NOT EXISTS ${dbName}`);
           alasql(`USE ${dbName}`);
-          
-          // 各テーブルの作成とデータ投入
-          Object.entries(db.tables).forEach(([tableName, table]) => {
+
+          // 各テーブルの作成
+          for (const [tableName, table] of Object.entries(db.tables)) {
             try {
-              // テーブルが存在する場合は削除
               alasql(`DROP TABLE IF EXISTS ${tableName}`);
-              
-              // カラムの定義を作成
               const columns = table.columns.map(col => `${col} STRING`).join(', ');
               alasql(`CREATE TABLE ${tableName} (${columns})`);
-              
-              // データの投入
-              if (table.data.length > 0) {
-                const placeholders = table.columns.map(() => '?').join(', ');
-                const insertSql = `INSERT INTO ${tableName} VALUES (${placeholders})`;
-                table.data.forEach(row => {
-                  alasql(insertSql, row);
-                });
-              }
             } catch (tableError) {
               console.error(`Error creating table ${tableName}:`, tableError);
             }
-          });
+          }
         } catch (dbError) {
           console.error(`Error creating database ${dbName}:`, dbError);
         }
-      });
-
+      }
     } catch (error) {
       console.error('Database initialization error:', error);
       throw error;
@@ -155,7 +146,7 @@ export class Database {
     }
 
     try {
-      // データ構造から直接テーブル情報を取得
+      // データ構造から接テーブル情報を取得
       const table = this.data.databases[this.currentDB].tables[tableName];
       if (!table) {
         return `Error: Table "${tableName}" not found`;
@@ -179,11 +170,37 @@ export class Database {
     }
   }
 
-  useDatabase(dbName: string): string {
+  async useDatabase(dbName: string): Promise<string> {
     if (this.data.databases[dbName]) {
       try {
-        alasql(`USE ${dbName}`);
+        // 既存のデータベースを確認
+        try {
+          alasql(`USE ${dbName}`);
+        } catch {
+          // データベースが存在しない場合のみ作成
+          alasql(`CREATE DATABASE ${dbName}`);
+          alasql(`USE ${dbName}`);
+        }
+        
         this.currentDB = dbName;
+
+        // データベース構造のみを取得
+        const response = await fetch(`/api/database-structure?dbName=${dbName}`);
+        const { structure } = await response.json();
+
+        // データベース構造を更新
+        this.data.databases[dbName].tables = structure;
+
+        // テーブル構造のみを作成（データは後で必要に応じて取得）
+        for (const [tableName, table] of Object.entries(structure) as [string, { columns: string[] }][]) {
+          try {
+            alasql(`DROP TABLE IF EXISTS ${tableName}`);
+            const columns = table.columns.map(col => `${col} STRING`).join(', ');
+            alasql(`CREATE TABLE ${tableName} (${columns})`);
+          } catch (error) {
+            console.error(`Error creating table ${tableName}:`, error);
+          }
+        }
         
         if (this.lastCommand?.startsWith('\\')) {
           return `You are now connected to database "${dbName}" as user "user"`;
@@ -198,7 +215,7 @@ export class Database {
     return `Error: Database "${dbName}" does not exist`;
   }
 
-  executeQuery(parsedQuery: ParsedQuery): string {
+  async executeQuery(parsedQuery: ParsedQuery): Promise<string> {
     this.lastCommand = parsedQuery.originalCommand;
 
     try {
@@ -211,23 +228,38 @@ export class Database {
             return 'Error: No database selected';
           }
           try {
-            alasql(`USE ${this.currentDB}`);
-            const result = alasql(parsedQuery.originalCommand);
-            return this.formatSelectResult(result);
+            // データを取得（すでにフィルタリング済み）
+            const response = await fetch('/api/query', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                dbName: this.currentDB,
+                query: parsedQuery.originalCommand
+              })
+            });
+            
+            const { result, columns } = await response.json();
+            
+            if (result && result.length > 0) {
+              return this.formatSelectResult(result, columns);
+            }
+            return '(0 rows)';
           } catch (error: any) {
             return `Error: ${error.message}`;
           }
         case 'USE_DATABASE':
-          if ('database' in parsedQuery) {
-            return this.useDatabase(parsedQuery.database);
+          if (this.isUseDatabaseQuery(parsedQuery)) {
+            return await this.useDatabase(parsedQuery.database);
           }
           return 'Error: Invalid USE DATABASE command';
         case 'SHOW_DATABASES':
         case 'LIST_DATABASES':
           return this.showDatabases();
         case 'DESCRIBE_TABLE':
-          if ('table' in parsedQuery) {
-            return this.describeTable(parsedQuery.table || '');
+          if (this.isDescribeTableQuery(parsedQuery)) {
+            return this.describeTable(parsedQuery.table);
           }
           return 'Error: Invalid DESCRIBE command';
         case 'EXIT':
@@ -235,22 +267,18 @@ export class Database {
             this.onExit();
           }
           return 'Bye';
-        case 'INSERT':
-        case 'UPDATE':
-        case 'DELETE':
-        case 'DROP_TABLE':
-        case 'CREATE_TABLE':
-          return `Error: ${parsedQuery.type} operation is not allowed in read-only mode`;
         case 'CANCEL':
           return '^C';
         case 'ERROR':
-          if ('message' in parsedQuery) { // 型ガードでチェック
+          if (this.isErrorQuery(parsedQuery)) {
             return parsedQuery.message || 'Unknown error';
           }
           return 'Unknown error';
         default: {
-          const exhaustiveCheck: never = parsedQuery; // 型の網羅性を保証
-          return `Error: Unknown query type: ${(parsedQuery as any).type}`;
+          if (['INSERT', 'UPDATE', 'DELETE', 'DROP_TABLE', 'CREATE_TABLE'].includes(parsedQuery.type as string)) {
+            return 'Error: Operation not allowed in read-only mode';
+          }
+          return `Error: Unknown query type: ${parsedQuery.type}`;
         }
       }
     } catch (error: any) {
@@ -258,15 +286,12 @@ export class Database {
     }
   }
 
-  private formatSelectResult(result: any[]): string {
+  private formatSelectResult(result: any[], columns: string[]): string {
     if (!result || result.length === 0) {
       return '(0 rows)';
     }
 
-    // カラム名を取得
-    const columns = Object.keys(result[0]);
-
-    // 各カラムの最大幅を計算（全角文字を考慮）
+    // カラム名の最大幅を計算
     const columnWidths = columns.map(col => {
       const headerWidth = this.getStringWidth(col);
       const maxDataWidth = result.reduce((max, row) => {
@@ -344,5 +369,17 @@ export class Database {
     if (!db || !this.data.databases[db]) return [];
     const table = this.data.databases[db].tables[tableName];
     return table ? table.columns : [];
+  }
+
+  private isUseDatabaseQuery(query: ParsedQuery): query is { type: 'USE_DATABASE'; database: string; originalCommand: string } {
+    return query.type === 'USE_DATABASE' && 'database' in query;
+  }
+
+  private isDescribeTableQuery(query: ParsedQuery): query is { type: 'DESCRIBE_TABLE'; table: string; originalCommand: string } {
+    return query.type === 'DESCRIBE_TABLE' && 'table' in query;
+  }
+
+  private isErrorQuery(query: ParsedQuery): query is { type: 'ERROR'; message: string; originalCommand: string } {
+    return query.type === 'ERROR' && 'message' in query;
   }
 } 

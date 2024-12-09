@@ -1,12 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'underfields.com'], // 必要に応じて本番ドメインを追加
+    domains: ['localhost'],
   },
   webpack: (config) => {
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}), // 既存のエイリアスを安全に拡張
-    };
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack', 'url-loader'],
+    });
     return config;
   },
 };

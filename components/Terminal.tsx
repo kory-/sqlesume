@@ -68,7 +68,7 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
     inputRef.current?.focus();
   }, []);
 
-  // 入力の変更を処理
+  // 入力更を処理
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInput(value);
@@ -79,7 +79,7 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
   };
 
   // コマンドを実行
-  const executeCommand = (command: string) => {
+  const executeCommand = async (command: string) => {
     if (!isTerminalMode) {
       appendOutput(`${getPrompt()}${command}`);
       executeTerminalCommand(command);
@@ -101,28 +101,39 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
 
       const parsedQuery = SQLParser.parse(command);
       if (parsedQuery) {
-        const result = db.current.executeQuery(parsedQuery);
-        if (result) {
-          appendOutput(result);
+        try {
+          const result = await db.current.executeQuery(parsedQuery);
+          if (result) {
+            appendOutput(result);
+          }
+          setSqlHistory(prev => [command, ...prev]);
+        } catch (error) {
+          appendOutput(`Error: ${error}`);
         }
-        setSqlHistory(prev => [command, ...prev]);
       }
     }
+    setInput('');
+    setCursorPosition(0);
+    setHistoryIndex(-1);
   };
 
   // キー押下を処理
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Ctrl+C の処理を追加
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
       e.preventDefault();
-      const parsedQuery: SimpleQuery = {  // BaseQueryからSimpleQueryに変更
+      const parsedQuery: SimpleQuery = {
         type: 'CANCEL',
         originalCommand: ''
       };
       appendOutput(`${getPrompt()}${input}`);
-      const result = db.current.executeQuery(parsedQuery);
-      if (result) {
-        appendOutput(result);
+      try {
+        const result = await db.current.executeQuery(parsedQuery);
+        if (result) {
+          appendOutput(result);
+        }
+      } catch (error) {
+        appendOutput(`Error: ${error}`);
       }
       setInput('');
       setCursorPosition(0);
@@ -506,7 +517,7 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
     }
   };
 
-  // ファイルサイズを人間が読みやすい形式に変換するヘルパー関数
+  // ファイルサイズを��間が読みやすい形式に変換するヘルパー関数
   const humanizeSize = (bytes: number): string => {
     const units = ['B', 'K', 'M', 'G'];
     let size = bytes;
@@ -518,6 +529,33 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
     }
     
     return `${Math.round(size)}${units[unitIndex]}`;
+  };
+
+  // データベース一覧の取得
+  const fetchDatabases = async () => {
+    const response = await fetch('/api/databases');
+    const data = await response.json();
+    return data.databases;
+  };
+
+  // データベース構��の取得
+  const fetchDatabaseStructure = async (dbName: string) => {
+    const response = await fetch(`/api/database-structure?dbName=${dbName}`);
+    const data = await response.json();
+    return data.structure;
+  };
+
+  // クエリの実行
+  const executeQuery = async (dbName: string, query: string) => {
+    const response = await fetch('/api/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ dbName, query }),
+    });
+    const data = await response.json();
+    return data.result;
   };
 
   return (
