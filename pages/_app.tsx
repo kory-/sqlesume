@@ -1,5 +1,5 @@
-import type { AppProps } from 'next/app'
 import { Analytics } from '@vercel/analytics/react'
+import type { AppProps } from 'next/app'
 import '../styles/console.css'
 
 export default function App({ Component, pageProps }: AppProps) {

@@ -1,8 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SQL Resume
+
+An interactive SQL terminal interface for exploring my professional background and skills through SQL queries.
+
+## Overview
+
+This project presents my resume data in the form of a SQL database, allowing visitors to explore my professional experience, skills, and background using SQL queries. It features both a SQL terminal mode and a basic Unix-like terminal interface.
+
+## Features
+
+- Interactive SQL terminal with syntax highlighting and auto-completion
+- Support for common SQL commands and PostgreSQL-style commands
+- Basic Unix-like terminal commands (`ls`, `imgcat`, etc.)
+- Real-time query execution
+- Responsive terminal interface
+- Customizable resume data structure through JSON
+
+## Available Databases
+
+- `career_db`: Contains professional information including:
+  - `personal_info`
+  - `education`
+  - `work_experience`
+  - `qualifications`
+  - `skills`
+  - `companies`
+- `private_db`: Contains personal information including:
+  - `hobbies`
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -10,27 +47,87 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to start exploring.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Example Queries
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sql
+-- Show all available tables
+SHOW TABLES;
 
-## Learn More
+-- View my skills
+SELECT skill_name, level, years_used FROM skills;
 
-To learn more about Next.js, take a look at the following resources:
+-- Check my work experience
+SELECT w.start_year, w.end_year, c.company_name, w.role 
+FROM work_experience w 
+JOIN companies c ON w.company_id = c.id;
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Customizing Resume Data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+You can customize the resume data by modifying the JSON file at `data/personal_data.json`. The structure follows this format:
 
-## Deploy on Vercel
+```json
+{
+  "databases": {
+    "database_name": {
+      "tables": {
+        "table_name": {
+          "columns": ["column1", "column2", ...],
+          "data": [
+            ["value1", "value2", ...],
+            ["value1", "value2", ...],
+            ...
+          ]
+        }
+      }
+    }
+  }
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### JSON Structure Rules
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Databases**: Create any number of databases to organize your data
+2. **Tables**: Each database can contain multiple tables
+3. **Columns**: Define column names as strings
+4. **Data**: Provide rows of data as arrays matching the column order
+5. **Data Types**: Supports:
+   - Strings
+   - Numbers
+   - Dates (as strings in "YYYY-MM-DD" format)
+   - "Present" keyword for current positions
+
+### Example Structure
+
+```json
+{
+  "databases": {
+    "career_db": {
+      "tables": {
+        "skills": {
+          "columns": ["id", "skill_name", "level", "years_used"],
+          "data": [
+            [1, "JavaScript", "Advanced", 5],
+            [2, "Python", "Intermediate", 3]
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+## Technologies Used
+
+- Next.js
+- TypeScript
+- AlaSQL
+- Tailwind CSS
+
+## License
+
+MIT License - feel free to use this project as a template for your own SQL resume!

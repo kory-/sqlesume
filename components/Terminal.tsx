@@ -4,6 +4,7 @@ import { SQLParser } from 'lib/sqlParser';
 import { DatabaseStructure, SimpleQuery } from 'lib/types';
 import personalData from 'data/personal_data.json';
 import { useRouter } from 'next/router';
+import { track } from '@vercel/analytics';
 
 interface TerminalProps {
   className?: string;
@@ -81,6 +82,12 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
   // コマンドを実行
   const executeCommand = async (command: string) => {
     if (!isTerminalMode) {
+      // ターミナルコマンドのトラッキング
+      track('terminal_command_executed', {
+        command: command,
+        timestamp: new Date().toISOString()
+      });
+      
       appendOutput(`${getPrompt()}${command}`);
       executeTerminalCommand(command);
       setTerminalHistory(prev => [command, ...prev]);
@@ -108,7 +115,13 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
           }
           setSqlHistory(prev => [command, ...prev]);
         } catch (error) {
-          appendOutput(`Error: ${error}`);
+          // エラーのトラッキング
+          track('sql_query_error', {
+            command: command,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString()
+          });
+          appendOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
     }
@@ -331,7 +344,7 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
 
   // useEffectを修正
   useEffect(() => {
-    // 入力欄への初期フォーカス
+    // 入力欄へ��初期フォーカス
     inputRef.current?.focus();
 
     // マウスアップ時のフォーカス制御
@@ -517,7 +530,7 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
     }
   };
 
-  // ファイルサイズを��間が読みやすい形式に変換するヘルパー関数
+  // ファイルサイズを間が読みやすい形式に変換するヘルパー関数
   const humanizeSize = (bytes: number): string => {
     const units = ['B', 'K', 'M', 'G'];
     let size = bytes;
@@ -538,7 +551,7 @@ export const Terminal: React.FC<TerminalProps> = ({ className, initialData }) =>
     return data.databases;
   };
 
-  // データベース構��の取得
+  // データベース構成の取得
   const fetchDatabaseStructure = async (dbName: string) => {
     const response = await fetch(`/api/database-structure?dbName=${dbName}`);
     const data = await response.json();

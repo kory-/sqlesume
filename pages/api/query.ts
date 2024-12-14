@@ -3,13 +3,21 @@ import personalData from 'data/personal_data.json';
 import { SQLParser } from 'lib/sqlParser';
 import { SelectQuery } from 'lib/types';
 import alasql from 'alasql';
+import { track } from '@vercel/analytics/server';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { dbName, query } = req.body;
 
   if (!dbName || !query) {
     return res.status(400).json({ error: 'Database name and query are required' });
   }
+
+  // クエリ実行をトラッキング
+  await track('sql_query_executed', { 
+    database: dbName,
+    query: query,
+    timestamp: new Date().toISOString()
+  });
 
   const db = personalData.databases[dbName as keyof typeof personalData.databases];
   if (!db) {
