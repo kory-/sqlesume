@@ -1,0 +1,126 @@
+{
+    "databases": {
+        "career_db": {
+            "tables": {
+                "personal_info": {
+                    "columns": ["name", "birth_date", "gender", "email"],
+                    "data": [
+                        [
+                            "Sample Name",
+                            "1990-01-01",
+                            "Non-binary",
+                            "sample@example.com"
+                        ]
+                    ]
+                },
+                "education": {
+                    "columns": ["start_year", "end_year", "institution", "degree"],
+                    "data": [
+                        [
+                            2004,
+                            2008,
+                            "Sample Technical High School, Department of Electronics",
+                            "Graduated"
+                        ],
+                        [
+                            2008,
+                            2012,
+                            "Sample University, Faculty of Engineering, Dept. of Information Systems",
+                            "Graduated"
+                        ]
+                    ]
+                },
+                "work_experience": {
+                    "columns": [
+                        "start_year",
+                        "end_year",
+                        "company_id",
+                        "role",
+                        "reason_for_leaving",
+                        "responsibilities"
+                    ],
+                    "data": [
+                        [
+                            2012,
+                            2014,
+                            1,
+                            "System Engineer",
+                            "Resigned",
+                            "Implemented backend services, met with clients, and created design specs."
+                        ],
+                        [
+                            2014,
+                            2018,
+                            2,
+                            "Engineering Manager",
+                            "Resigned",
+                            "Led a small full-stack team delivering contract projects."
+                        ],
+                        [
+                            2018,
+                            2022,
+                            3,
+                            "Head of Development",
+                            "Transferred",
+                            "Owned architecture, mentored engineers, and drove delivery."
+                        ],
+                        [
+                            2022,
+                            "Present",
+                            4,
+                            "CTO",
+                            "Currently employed",
+                            "Guides technical strategy and oversees cross-functional engineering."
+                        ]
+                    ]
+                },
+                "qualifications": {
+                    "columns": ["qualification_name", "issue_year"],
+                    "data": [
+                        [
+                            "Driver's License",
+                            2008
+                        ],
+                        [
+                            "Sample Cloud Certification – Professional",
+                            2023
+                        ]
+                    ]
+                },
+                "skills": {
+                    "columns": ["id", "skill_name", "level", "years_used"],
+                    "data": [
+                        [1, "Python", "Advanced", 6],
+                        [2, "JavaScript", "Advanced", 8],
+                        [3, "Ruby", "Intermediate", 2],
+                        [4, "PHP", "Intermediate", 4],
+                        [5, "Go", "Intermediate", 3],
+                        [6, "Cloud Platforms", "Advanced", 7]
+                    ]
+                },
+                "companies": {
+                    "columns": ["id", "company_name", "industry", "size", "description"],
+                    "data": [
+                        [1, "Sample Systems Inc.", "Contracted Development", "50 employees", "Delivers custom software using open technologies"],
+                        [2, "Example Grid LLC", "Contracted Development", "10 employees", "Boutique web and mobile development"],
+                        [3, "Fictional Labs", "SaaS", "80 employees", "Marketing automation platform"],
+                        [4, "Placeholder Corp.", "E-commerce", "120 employees", "Online retail and logistics"]
+                    ]
+                }
+            }
+        },
+        "private_db": {
+            "tables": {
+                "hobbies": {
+                    "columns": ["id", "hobby"],
+                    "data": [
+                        [1, "gaming"],
+                        [2, "reading sci-fi"],
+                        [3, "trail running"],
+                        [4, "diy electronics"]
+                    ]
+                }
+            }
+        }
+    }
+}

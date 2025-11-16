@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .terminal-wrapper {
+    @apply bg-[#1e1e1e] text-white font-mono p-4 h-screen overflow-y-auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .terminal-line-height {
+    @apply leading-[1.2] min-h-[1.2em];
+    line-height: 20px;
+    min-height: 20px;
+  }
+
+  .terminal-output {
+    @apply whitespace-pre-wrap break-all;
+  }
+
+  .terminal-output div {
+    @apply terminal-line-height;
+  }
+
+  .terminal-input-line {
+    @apply flex items-baseline relative bg-[#1e1e1e] terminal-line-height;
+  }
+
+  .terminal-prompt {
+    @apply text-[#00ff00] whitespace-pre;
+  }
+
+  .terminal-input-container {
+    @apply flex-grow;
+    white-space: pre; /* スペースと改行を保持 */
+    position: relative;
+  }
+
+  .terminal-input-display {
+    @apply inline;
+    white-space: pre; /* 必要に応じて追加 */
+  }
+
+  .terminal-cursor {
+    @apply inline-block bg-[#00ff00];
+    height: 1.2em;
+    opacity: 0.5;
+    width: 0.1em;
+    margin-left: 0;
+  }
+
+  .terminal-hidden-input {
+    @apply absolute opacity-0 h-0 w-0 overflow-hidden;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .terminal-input {
+    @apply bg-transparent border-none outline-none p-0 m-0;
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    caret-color: transparent; /* キャレットを透明に設定 */
+  }
+
+  .terminal-input-display span {
+    vertical-align: middle;
+  }
+
+  .directory {
+    color: #4e98e6;
+    font-weight: bold;
+  }
+
+  .file {
+    color: #ffffff;
+  }
+}
